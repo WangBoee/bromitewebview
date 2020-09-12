@@ -67,7 +67,7 @@ Here is our [Discord](https://discord.gg/gTnDxQ6)
   - MIUI is not officially supported unless someone is willing to share the overlays used in MIUI. I have mixed results from testers in how well it works.
 - Magisk v18.2+ (No other root solution is supported, for forwards compatibility)
 - **Recommended to flash through magisk manager**
-	- TWRP installs should work; however this requires a working correctly TWRP, decrypted /data, and the bromite webview.apk for your cpu architecture in /sdcard/bromite
+	- TWRP installs should work; however this requires a working correctly TWRP, decrypted /data, and the bromite webview.apk for your cpu architecture in /sdcard/download/bromite
 	     - Deprecated in v5.0.0
 - SELinux enforcing
 
