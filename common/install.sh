@@ -3,7 +3,7 @@
 
 $BOOTMODE && SDCARD=/storage/emulated/0 || SDCARD=/sdcard
 mkdir "$MODPATH"/logs
-VERSIONFILE='/sdcard/bromite/version'
+VERSIONFILE='/sdcard/bromite/download/version'
 if test "$ARCH" = "x86_64" ;
 then
 	alias aapt='$MODPATH/common/tools/aapt64' ;
@@ -34,41 +34,41 @@ then
 fi
 ui_print "- $ARCH SDK $API system detected, selecting the appropriate files"
 # Set up version check
-mkdir -p /sdcard/bromite
-if [ ! -f /sdcard/bromite/version ];
+mkdir -p /sdcard/bromite/download
+if [ ! -f /sdcard/bromite/download/version ];
 then
 	mktouch $VERSIONFILE
 	echo "0" > $VERSIONFILE;
 fi
 # Handle version upgrades
-rm -rf /sdcard/bromite/webview.apk
+rm -rf /sdcard/bromite/download/webview.apk
 download_webview () {
 	ui_print "- Downloading extra files please be patient..."
 	V=$(curl -k -L --silent "https://api.github.com/repos/bromite/bromite/releases/latest" |   grep '"tag_name":' |  sed -E 's/.*"([^"]+)".*/\1/')
 	echo "$V" > "$VERSIONFILE"
 	URL="https://github.com/bromite/bromite/releases/download/${V}/${ARCH}_SystemWebView.apk"
-	if [ -f /sdcard/bromite/"${ARCH}"_SystemWebView.apk ] ;
+	if [ -f /sdcard/download/bromite/"${ARCH}"_SystemWebView.apk ] ;
 	then
 	# Only re-download if it's an upgrade
 		if [ "$(< "$VERSIONFILE" tr -d '.')" -lt "$(echo "$V" | tr -d '.')" ];
 		then
-			curl -k -L -o /sdcard/bromite/"${ARCH}"_SystemWebView.apk "$URL"
+			curl -k -L -o /sdcard/download/bromite/"${ARCH}"_SystemWebView.apk "$URL"
 		fi
 	else
 		# If the file doesn't exist, let's attempt a download anyway
-		curl -k -L -o /sdcard/bromite/"${ARCH}"_SystemWebView.apk "$URL" ;
+		curl -k -L -o /sdcard/download/bromite/"${ARCH}"_SystemWebView.apk "$URL" ;
 	fi
 }
 verify_webview () {
 	ui_print "Verifying files..."
 	curl -L -k -o "$TMPDIR"/"$ARCH"_SystemWebView.apk.sha256.txt https://github.com/bromite/bromite/releases/download/"$V"/brm_"$V".sha256.txt
-	cd /sdcard/bromite || return
-	grep "$ARCH"_SystemWebView.apk "$TMPDIR"/"$ARCH"_SystemWebView.apk.sha256.txt > /sdcard/bromite/"$ARCH"_SystemWebView.apk.sha256.txt 
-	sha256sum -sc /sdcard/bromite/"$ARCH"_SystemWebview.apk.sha256.txt 
+	cd /sdcard/download/bromite || return
+	grep "$ARCH"_SystemWebView.apk "$TMPDIR"/"$ARCH"_SystemWebView.apk.sha256.txt > /sdcard/download/bromite/"$ARCH"_SystemWebView.apk.sha256.txt 
+	sha256sum -sc /sdcard/download/bromite/"$ARCH"_SystemWebview.apk.sha256.txt 
 	if test $? -ne 0 ;
 	then
 		ui_print "Verification failed, retrying download"
-		rm -f /sdcard/bromite/"${ARCH}"_SystemWebView.apk
+		rm -f /sdcard/download/bromite/"${ARCH}"_SystemWebView.apk
 		download_webview
 		verify_webview ;
 	else
@@ -81,7 +81,7 @@ if test $? -eq 0 ;
 then
 	download_webview
 	verify_webview ;
-elif test ! -f /sdcard/bromite/"${ARCH}"_SystemWebView.apk ;
+elif test ! -f /sdcard/download/bromite/"${ARCH}"_SystemWebView.apk ;
 then
 	# File wasn't found and all attempts to download failed
 	ui_print "Sorry! A problem occurred."
@@ -96,7 +96,7 @@ paths=$(cmd package dump com.android.webview | grep codePath); APKPATH=${paths##
 [ -z "${APKPATH}" ] && paths=$(cmd package dump com.google.android.webview | grep codePath); APKPATH=${paths##*=}
 [ -z "${APKPATH}" ] && paths=$(cmd package dump com.android.webview | grep codePath); APKPATH=${paths##*=}
 [ -z "${APKPATH}" ] && APKPATH="/system/app/webview"
-cp_ch ${SDCARD}/bromite/"${ARCH}"_SystemWebView.apk "$MODPATH"$APKPATH/webview.apk
+cp_ch ${SDCARD}/download/bromite/"${ARCH}"_SystemWebView.apk "$MODPATH"$APKPATH/webview.apk
 touch "$MODPATH"$APKPATH/.replace
 cp "$MODPATH"$APKPATH/webview.apk "$TMPDIR"/webview.zip 
 mkdir "$TMPDIR"/webview -p
@@ -148,9 +148,9 @@ then
 fi
 ui_print "- Cleaning up..."
 mkdir -p "$MODPATH"/apk
-cp_ch /sdcard/bromite/"${ARCH}"_SystemWebView.apk "$MODPATH"/apk
+cp_ch /sdcard/download/bromite/"${ARCH}"_SystemWebView.apk "$MODPATH"/apk
 rm -f "$MODPATH"/system/app/placeholder
-mkdir -p /sdcard/bromite/logs
+mkdir -p /sdcard/download/bromite/logs
 rm -f "$MODPATH"/*.md
 ui_print "- Backing up important stuffs"
 mkdir -p "$MODPATH"/backup/
